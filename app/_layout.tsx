@@ -2,9 +2,10 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Colors } from '@constants/Colors';
+import { useHabitStore, useUserStore } from '@store';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -26,8 +27,27 @@ const NavigationTheme = {
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     // Add custom fonts here if needed
-    // 'CustomFont-Regular': require('../assets/fonts/CustomFont-Regular.ttf'),
   });
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Initialize stores
+  const loadHabits = useHabitStore(state => state.loadHabits);
+  const loadProfile = useUserStore(state => state.loadProfile);
+
+  useEffect(() => {
+    // Load data from storage
+    const loadData = async () => {
+      try {
+        await Promise.all([loadHabits(), loadProfile()]);
+        setDataLoaded(true);
+      } catch (error) {
+        console.error('Error loading app data:', error);
+        setDataLoaded(true); // Continue anyway
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
@@ -35,12 +55,12 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && dataLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, dataLoaded]);
 
-  if (!loaded) {
+  if (!loaded || !dataLoaded) {
     return null;
   }
 
@@ -54,33 +74,7 @@ export default function RootLayout() {
             backgroundColor: Colors.background.primary,
           },
         }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modals/create-habit"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerTitle: 'New Habit',
-            headerStyle: {
-              backgroundColor: Colors.background.tertiary,
-            },
-            headerTintColor: Colors.text.primary,
-          }}
-        />
-        <Stack.Screen
-          name="modals/habit-detail"
-          options={{
-            presentation: 'modal',
-            headerShown: true,
-            headerTitle: 'Habit Details',
-            headerStyle: {
-              backgroundColor: Colors.background.tertiary,
-            },
-            headerTintColor: Colors.text.primary,
-          }}
-        />
-      </Stack>
+      />
     </ThemeProvider>
   );
 }

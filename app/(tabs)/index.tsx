@@ -9,6 +9,8 @@ import { XPBar } from '@components/gamification/XPBar';
 import { StreakCounter } from '@components/gamification/StreakCounter';
 import { QuoteCard } from '@components/ui/QuoteCard';
 import { StatsCard } from '@components/ui/StatsCard';
+import { useHabitStore, useUserStore } from '@store';
+import { useFocusEffect } from 'expo-router';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -19,17 +21,14 @@ export default function TodayScreen() {
   const [greetingEmoji, setGreetingEmoji] = useState(getGreetingEmoji());
   const [currentDate, setCurrentDate] = useState(getFormattedDate());
 
-  // Mock data - will be replaced with real data from Zustand store
-  const [userStats] = useState({
-    currentXP: 750,
-    requiredXP: 1000,
-    level: 5,
-    currentStreak: 7,
-    bestStreak: 12,
-    habitsCompleted: 8,
-    totalHabits: 12,
-    weeklyCompletion: 85,
-  });
+  // Store data
+  const { profile, getProgressToNextLevel, getRequiredXP } = useUserStore();
+  const { getCompletedTodayCount, getTotalActiveToday } = useHabitStore();
+
+  const completedToday = getCompletedTodayCount();
+  const totalToday = getTotalActiveToday();
+  const progressXP = getProgressToNextLevel();
+  const requiredXP = getRequiredXP();
 
   const loadQuote = async () => {
     try {
@@ -56,34 +55,43 @@ export default function TodayScreen() {
     return () => clearInterval(interval);
   }, []);
 
+  // Reload data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      // Data will auto-update from store
+    }, [])
+  );
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadQuote();
     setRefreshing(false);
   }, []);
 
+  const completionRate = totalToday > 0 ? Math.round((completedToday / totalToday) * 100) : 0;
+
   const todayStats = [
     {
       label: 'Completed',
-      value: `${userStats.habitsCompleted}/${userStats.totalHabits}`,
+      value: `${completedToday}/${totalToday}`,
       icon: '✅',
       color: theme.colors.success,
     },
     {
-      label: 'Weekly Rate',
-      value: `${userStats.weeklyCompletion}%`,
+      label: 'Completion Rate',
+      value: `${completionRate}%`,
       icon: '📈',
       color: theme.colors.accent.blue,
     },
     {
       label: 'Total XP',
-      value: userStats.currentXP,
+      value: profile.xp,
       icon: '⭐',
       color: theme.colors.xp.bar,
     },
     {
       label: 'Streak',
-      value: `${userStats.currentStreak} days`,
+      value: `${profile.currentStreak} days`,
       icon: '🔥',
       color: theme.colors.streak.fire,
     },
@@ -134,9 +142,9 @@ export default function TodayScreen() {
           ]}
         >
           <XPBar 
-            currentXP={userStats.currentXP}
-            requiredXP={userStats.requiredXP}
-            level={userStats.level}
+            currentXP={progressXP}
+            requiredXP={XP_PER_LEVEL}
+            level={profile.level}
           />
         </View>
 
@@ -154,8 +162,8 @@ export default function TodayScreen() {
           ]}
         >
           <StreakCounter 
-            currentStreak={userStats.currentStreak}
-            bestStreak={userStats.bestStreak}
+            currentStreak={profile.currentStreak}
+            bestStreak={profile.bestStreak}
           />
         </View>
 
@@ -198,13 +206,15 @@ export default function TodayScreen() {
             📅 Today's Habits
           </Text>
           <Text style={[{ color: theme.colors.text.secondary, marginTop: theme.spacing.md }, theme.textStyles.body]}>
-            Your habit list and completion tracking will appear here.
+            Your habit list and completion tracking will appear here next.
           </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const XP_PER_LEVEL = 1000; // Match the value from userStore
 
 const styles = StyleSheet.create({
   container: {
