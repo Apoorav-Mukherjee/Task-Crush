@@ -8,8 +8,9 @@ import { StatBox } from '@components/ui/StatBox';
 import { ConfirmDialog } from '@components/ui/ConfirmDialog';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StorageService } from '@services/storage';
 import * as Haptics from 'expo-haptics';
+import { StorageService, StorageKeys } from '@services/storage';
+import { NotificationService } from '@services/notifications';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -17,10 +18,30 @@ export default function ProfileScreen() {
   const { profile, loadProfile } = useUserStore();
   const { habits, loadHabits } = useHabitStore();
 
+  const [showDevSection, setShowDevSection] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hapticsEnabled, setHapticsEnabled] = useState(true);
+
+  const handleNotificationToggle = async (value: boolean) => {
+    if (value) {
+      const hasPermission = await NotificationService.requestPermissions();
+      if (hasPermission) {
+        // Schedule daily reminder at 9 AM
+        await NotificationService.scheduleDailyReminder(9, 0);
+        setNotificationsEnabled(true);
+        Alert.alert('Success', 'Daily reminders enabled at 9:00 AM');
+      } else {
+        Alert.alert('Permission Denied', 'Please enable notifications in your device settings');
+      }
+    } else {
+      await NotificationService.cancelAllNotifications();
+      setNotificationsEnabled(false);
+    }
+  };
 
   const handleEditProfile = () => {
     router.push('/modals/edit-profile');
@@ -42,6 +63,17 @@ export default function ProfileScreen() {
   const completionRate = habits.length > 0
     ? Math.round((habits.filter(h => h.completionHistory.length > 0).length / habits.length) * 100)
     : 0;
+
+  const handleVersionTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+
+    if (newCount >= 7) {
+      setShowDevSection(true);
+      Alert.alert('Developer Mode', 'Developer features unlocked!');
+      setTapCount(0);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -172,11 +204,12 @@ export default function ProfileScreen() {
 
           <SettingItem
             icon="notifications-outline"
-            label="Notifications"
+            label="Daily Reminders (9 AM)"
             type="toggle"
             toggleValue={notificationsEnabled}
-            onToggle={setNotificationsEnabled}
+            onToggle={handleNotificationToggle}
           />
+
 
           <SettingItem
             icon="volume-high-outline"
@@ -230,12 +263,15 @@ export default function ProfileScreen() {
             ℹ️ About
           </Text>
 
-          <SettingItem
-            icon="information-circle-outline"
-            label="Version"
-            type="info"
-            value="1.0.0"
-          />
+          // Replace the Version SettingItem with this:
+          <TouchableOpacity onPress={handleVersionTap}>
+            <SettingItem
+              icon="information-circle-outline"
+              label="Version"
+              type="info"
+              value="1.0.0"
+            />
+          </TouchableOpacity>
 
           <SettingItem
             icon="calendar-outline"
@@ -251,6 +287,92 @@ export default function ProfileScreen() {
             onPress={() => Alert.alert('Help', 'For support, please contact support@habittracker.com')}
           />
         </View>
+        {showDevSection && (
+          <View style={styles.devSection}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.error }, theme.textStyles.h4]}>
+              🔧 Developer
+            </Text>
+
+            <SettingItem
+              icon="bug-outline"
+              label="Clear All Habits"
+              type="navigation"
+              onPress={() => {
+                Alert.alert(
+                  'Clear All Habits?',
+                  'This will delete all habits but keep your profile.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Clear',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await StorageService.delete(StorageKeys.HABITS);
+                        await loadHabits();
+                        Alert.alert('Success', 'All habits cleared!');
+                      },
+                    },
+                  ]
+                );
+              }}
+              color={theme.colors.warning}
+            />
+
+            <SettingItem
+              icon="refresh-outline"
+              label="Reset Profile Only"
+              type="navigation"
+              onPress={() => {
+                Alert.alert(
+                  'Reset Profile?',
+                  'This will reset your XP, level, and streaks but keep your habits.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Reset',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await StorageService.delete(StorageKeys.USER_PROFILE);
+                        await loadProfile();
+                        Alert.alert('Success', 'Profile reset!');
+                      },
+                    },
+                  ]
+                );
+              }}
+              color={theme.colors.warning}
+            />
+
+            <SettingItem
+              icon="code-outline"
+              label="View Storage Keys"
+              type="navigation"
+              onPress={() => {
+                Alert.alert('Storage Keys', `HABITS: ${StorageKeys.HABITS}\nUSER_PROFILE: ${StorageKeys.USER_PROFILE}`);
+              }}
+              color={theme.colors.info}
+            />
+
+            <SettingItem
+              icon="close-circle-outline"
+              label="Hide Developer Menu"
+              type="navigation"
+              onPress={() => setShowDevSection(false)}
+              color={theme.colors.text.tertiary}
+            />
+            
+            <SettingItem
+              icon="notifications-outline"
+              label="Test Notification"
+              type="navigation"
+              onPress={async () => {
+                await NotificationService.sendTestNotification();
+                Alert.alert('Sent!', 'Check your notifications');
+              }}
+              color={theme.colors.info}
+            />
+          </View>
+        )}
       </ScrollView>
 
       {/* Reset Confirmation Dialog */}
@@ -322,6 +444,9 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   aboutSection: {
+    marginBottom: 32,
+  },
+  devSection: {
     marginBottom: 32,
   },
 });

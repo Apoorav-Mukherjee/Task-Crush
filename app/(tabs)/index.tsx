@@ -13,7 +13,7 @@ import { useHabitStore, useUserStore, XP_PER_HABIT } from '@store';
 import { useFocusEffect } from 'expo-router';
 import { HabitCard } from '@components/habits/HabitCard';
 import { isHabitCompletedToday } from '@features/habits/utils';
-
+import { WeeklyChart } from '@components/charts/WeeklyChart';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -24,7 +24,7 @@ export default function TodayScreen() {
   const [greetingEmoji, setGreetingEmoji] = useState(getGreetingEmoji());
   const [currentDate, setCurrentDate] = useState(getFormattedDate());
 
-  const { getTodayHabits, toggleHabitCompletion, toggleHabitStar } = useHabitStore();
+  const { habits, getTodayHabits, toggleHabitCompletion, toggleHabitStar } = useHabitStore();
   const { addXP, incrementTotalCompletions } = useUserStore();
 
   const todayHabits = getTodayHabits();
@@ -48,6 +48,27 @@ export default function TodayScreen() {
       await addXP(-XP_PER_HABIT);
       // Note: We don't decrement total completions as that's a lifetime stat
     }
+  };
+  const getWeeklyData = () => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const today = new Date();
+    const currentDay = today.getDay(); // 0 = Sunday
+
+    return days.map((day, index) => {
+      // Calculate how many habits were completed on each day
+      const dayIndex = (index + 1) % 7; // Convert to match getDay() format
+      const daysAgo = (currentDay - dayIndex + 7) % 7;
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() - daysAgo);
+      const dateString = targetDate.toISOString().split('T')[0];
+
+      const completions = habits.filter(habit => {
+        const record = habit.completionHistory.find(r => r.date === dateString);
+        return record?.completed;
+      }).length;
+
+      return { day, completions };
+    });
   };
 
   const handleToggleStar = async (habitId: string) => {
@@ -222,6 +243,7 @@ export default function TodayScreen() {
           <StatsCard stats={todayStats} />
         </View>
 
+        
 
         {/* TODAY'S HABITS - Add this section */}
         <View
