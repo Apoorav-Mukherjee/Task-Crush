@@ -37,9 +37,16 @@ export default function TodayScreen() {
 
     await toggleHabitCompletion(habitId);
 
+    // FIXED: Only add XP when going from incomplete to complete
+    // And subtract XP when going from complete to incomplete
     if (!wasCompleted) {
+      // Completing the habit
       await addXP(XP_PER_HABIT);
       await incrementTotalCompletions();
+    } else {
+      // Un-completing the habit - remove XP
+      await addXP(-XP_PER_HABIT);
+      // Note: We don't decrement total completions as that's a lifetime stat
     }
   };
 
@@ -217,7 +224,7 @@ export default function TodayScreen() {
 
 
         {/* TODAY'S HABITS - Add this section */}
-        <View 
+        <View
           style={[
             styles.card,
             {
@@ -232,7 +239,7 @@ export default function TodayScreen() {
           <Text style={[{ color: theme.colors.text.primary, marginBottom: theme.spacing.md }, theme.textStyles.h4]}>
             📅 Today's Habits
           </Text>
-          
+
           {todayHabits.length === 0 ? (
             <Text style={[{ color: theme.colors.text.secondary }, theme.textStyles.body]}>
               No habits scheduled for today. You can add habits from the Habits tab!

@@ -11,7 +11,7 @@ import { isHabitCompletedToday } from '@features/habits/utils';
 export default function HabitsScreen() {
   const theme = useTheme();
   const router = useRouter();
-  
+
   const { habits, toggleHabitCompletion, toggleHabitStar } = useHabitStore();
   const { addXP, incrementTotalCompletions } = useUserStore();
 
@@ -20,13 +20,15 @@ export default function HabitsScreen() {
     if (!habit) return;
 
     const wasCompleted = isHabitCompletedToday(habit);
-    
+
     await toggleHabitCompletion(habitId);
-    
-    // Add XP if completing (not un-completing)
+
+    // FIXED: Same logic as above
     if (!wasCompleted) {
       await addXP(XP_PER_HABIT);
       await incrementTotalCompletions();
+    } else {
+      await addXP(-XP_PER_HABIT);
     }
   };
 
@@ -47,11 +49,11 @@ export default function HabitsScreen() {
   const regularHabits = habits.filter(h => !h.isStarred);
 
   return (
-    <SafeAreaView 
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]} 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
       edges={['top', 'left', 'right']}
     >
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
