@@ -11,12 +11,17 @@ import { useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { StorageService, StorageKeys } from '@services/storage';
 import { NotificationService } from '@services/notifications';
+import { GoogleDriveService } from '@services/google-drive';
+import { useEffect } from 'react';
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const router = useRouter();
   const { profile, loadProfile } = useUserStore();
   const { habits, loadHabits } = useHabitStore();
+
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const { request, response, promptAsync } = GoogleDriveService.useGoogleAuth();
 
   const [showDevSection, setShowDevSection] = useState(false);
   const [tapCount, setTapCount] = useState(0);
@@ -40,6 +45,27 @@ export default function ProfileScreen() {
     } else {
       await NotificationService.cancelAllNotifications();
       setNotificationsEnabled(false);
+    }
+  };
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      setGoogleToken(authentication?.accessToken || null);
+    }
+  }, [response]);
+
+  const handleGoogleBackup = async () => {
+    if (!googleToken) {
+      // Sign in first
+      await promptAsync();
+      return;
+    }
+
+    const success = await GoogleDriveService.uploadBackup(googleToken);
+    if (success) {
+      Alert.alert('Success', 'Backup uploaded to Google Drive!');
+    } else {
+      Alert.alert('Error', 'Failed to upload backup');
     }
   };
 
@@ -243,9 +269,9 @@ export default function ProfileScreen() {
 
           <SettingItem
             icon="cloud-upload-outline"
-            label="Backup to Cloud"
+            label={googleToken ? "Backup to Google Drive" : "Sign in to Google Drive"}
             type="navigation"
-            onPress={() => Alert.alert('Coming Soon', 'Cloud backup will be added soon!')}
+            onPress={handleGoogleBackup}
           />
 
           <SettingItem
@@ -360,7 +386,7 @@ export default function ProfileScreen() {
               onPress={() => setShowDevSection(false)}
               color={theme.colors.text.tertiary}
             />
-            
+
             <SettingItem
               icon="notifications-outline"
               label="Test Notification"
