@@ -1,22 +1,31 @@
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { StorageService, StorageKeys } from './storage';
+import * as AuthSession from 'expo-auth-session';
+
 
 WebBrowser.maybeCompleteAuthSession();
 
 // You'll need to get these from Google Cloud Console
-const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+const GOOGLE_CLIENT_ID = '1033217324722-hsovoni4d5p244q36ja1cg1st7qcs4ko.apps.googleusercontent.com';
 const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+
+const redirectUri = AuthSession.makeRedirectUri({
+  scheme: 'habittracker', // MUST match app.json
+});
+
+
 
 export const GoogleDriveService = {
   // Initialize Google Sign-In
   useGoogleAuth() {
     const [request, response, promptAsync] = Google.useAuthRequest({
-      clientId: GOOGLE_CLIENT_ID,
-      iosClientId: GOOGLE_CLIENT_ID,
-      androidClientId: GOOGLE_CLIENT_ID,
-      scopes: [GOOGLE_DRIVE_SCOPE],
+      clientId: '1033217324722-hsovoni4d5p244q36ja1cg1st7qcs4ko.apps.googleusercontent.com',
+      scopes: ['https://www.googleapis.com/auth/drive.file'],
+      redirectUri,
     });
+    
+    console.log(redirectUri);
 
     return { request, response, promptAsync };
   },
@@ -27,7 +36,7 @@ export const GoogleDriveService = {
       // Get all data
       const habits = await StorageService.getObject(StorageKeys.HABITS);
       const profile = await StorageService.getObject(StorageKeys.USER_PROFILE);
-      
+
       const backupData = {
         habits,
         profile,
@@ -93,7 +102,7 @@ export const GoogleDriveService = {
       );
 
       const backupData = await response.json();
-      
+
       if (backupData.habits) {
         await StorageService.setObject(StorageKeys.HABITS, backupData.habits);
       }

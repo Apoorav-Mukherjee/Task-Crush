@@ -14,6 +14,7 @@ import { useFocusEffect } from 'expo-router';
 import { HabitCard } from '@components/habits/HabitCard';
 import { isHabitCompletedToday } from '@features/habits/utils';
 import { WeeklyChart } from '@components/charts/WeeklyChart';
+import { StreakChart } from '@components/charts/StreakChart';
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -243,7 +244,40 @@ export default function TodayScreen() {
           <StatsCard stats={todayStats} />
         </View>
 
-        
+        {/* Weekly Chart */}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.background.tertiary,
+              borderRadius: theme.layout.borderRadius.lg,
+              padding: theme.spacing.xl,
+              marginTop: theme.spacing.base,
+              ...theme.shadows.md,
+            }
+          ]}
+        >
+          <WeeklyChart data={getWeeklyData()} />
+        </View>
+
+        {/* Streak Chart */}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.background.tertiary,
+              borderRadius: theme.layout.borderRadius.lg,
+              padding: theme.spacing.xl,
+              marginTop: theme.spacing.base,
+              ...theme.shadows.md,
+            }
+          ]}
+        >
+          <StreakChart
+            currentStreak={profile.currentStreak}
+            bestStreak={profile.bestStreak}
+          />
+        </View>
 
         {/* TODAY'S HABITS - Add this section */}
         <View

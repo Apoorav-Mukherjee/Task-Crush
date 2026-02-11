@@ -58,6 +58,7 @@ export default function ProfileScreen() {
     if (!googleToken) {
       // Sign in first
       await promptAsync();
+      
       return;
     }
 

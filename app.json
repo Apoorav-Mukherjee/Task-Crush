@@ -1,13 +1,14 @@
 {
   "expo": {
     "name": "habit-tracker",
-    "slug": "habit-tracker",
+    "slug": "taskcrush",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "habittracker",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "platforms": ["ios", "android"],
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -43,6 +44,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b887d6f4-e1e2-461c-a573-89116d2b237d"
+      }
+    },
+    "owner": "apoorav-mukherjee"
   }
 }
