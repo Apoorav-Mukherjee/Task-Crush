@@ -27,7 +27,7 @@ interface UserStore {
   getProgressToNextLevel: () => number;
 }
 
-const XP_PER_LEVEL = 1000;
+export const XP_PER_LEVEL = 1000;
 const XP_PER_HABIT = 50;
 
 const calculateLevel = (xp: number): number => {

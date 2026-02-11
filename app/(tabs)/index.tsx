@@ -9,8 +9,11 @@ import { XPBar } from '@components/gamification/XPBar';
 import { StreakCounter } from '@components/gamification/StreakCounter';
 import { QuoteCard } from '@components/ui/QuoteCard';
 import { StatsCard } from '@components/ui/StatsCard';
-import { useHabitStore, useUserStore } from '@store';
+import { useHabitStore, useUserStore, XP_PER_HABIT } from '@store';
 import { useFocusEffect } from 'expo-router';
+import { HabitCard } from '@components/habits/HabitCard';
+import { isHabitCompletedToday } from '@features/habits/utils';
+
 
 export default function TodayScreen() {
   const theme = useTheme();
@@ -20,6 +23,29 @@ export default function TodayScreen() {
   const [greeting, setGreeting] = useState(getGreeting());
   const [greetingEmoji, setGreetingEmoji] = useState(getGreetingEmoji());
   const [currentDate, setCurrentDate] = useState(getFormattedDate());
+
+  const { getTodayHabits, toggleHabitCompletion, toggleHabitStar } = useHabitStore();
+  const { addXP, incrementTotalCompletions } = useUserStore();
+
+  const todayHabits = getTodayHabits();
+
+  const handleToggleComplete = async (habitId: string) => {
+    const habit = todayHabits.find(h => h.id === habitId);
+    if (!habit) return;
+
+    const wasCompleted = isHabitCompletedToday(habit);
+
+    await toggleHabitCompletion(habitId);
+
+    if (!wasCompleted) {
+      await addXP(XP_PER_HABIT);
+      await incrementTotalCompletions();
+    }
+  };
+
+  const handleToggleStar = async (habitId: string) => {
+    await toggleHabitStar(habitId);
+  };
 
   // Store data
   const { profile, getProgressToNextLevel, getRequiredXP } = useUserStore();
@@ -44,7 +70,7 @@ export default function TodayScreen() {
 
   useEffect(() => {
     loadQuote();
-    
+
     // Update greeting every minute
     const interval = setInterval(() => {
       setGreeting(getGreeting());
@@ -98,16 +124,16 @@ export default function TodayScreen() {
   ];
 
   return (
-    <SafeAreaView 
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]} 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
       edges={['top', 'left', 'right']}
     >
       <LinearGradient
         colors={[theme.colors.accent.purple + '20', 'transparent']}
         style={styles.gradient}
       />
-      
-      <ScrollView 
+
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -130,7 +156,7 @@ export default function TodayScreen() {
         </View>
 
         {/* XP Progress Card */}
-        <View 
+        <View
           style={[
             styles.card,
             {
@@ -141,7 +167,7 @@ export default function TodayScreen() {
             }
           ]}
         >
-          <XPBar 
+          <XPBar
             currentXP={progressXP}
             requiredXP={XP_PER_LEVEL}
             level={profile.level}
@@ -149,7 +175,7 @@ export default function TodayScreen() {
         </View>
 
         {/* Streak Card */}
-        <View 
+        <View
           style={[
             styles.card,
             {
@@ -161,7 +187,7 @@ export default function TodayScreen() {
             }
           ]}
         >
-          <StreakCounter 
+          <StreakCounter
             currentStreak={profile.currentStreak}
             bestStreak={profile.bestStreak}
           />
@@ -170,13 +196,13 @@ export default function TodayScreen() {
         {/* Quote Card */}
         <View style={{ marginTop: theme.spacing.base }}>
           {quote ? (
-            <QuoteCard 
+            <QuoteCard
               quote={quote.content}
               author={quote.author}
               loading={quoteLoading}
             />
           ) : (
-            <QuoteCard 
+            <QuoteCard
               quote=""
               author=""
               loading={true}
@@ -189,7 +215,8 @@ export default function TodayScreen() {
           <StatsCard stats={todayStats} />
         </View>
 
-        {/* Coming Soon Card */}
+
+        {/* TODAY'S HABITS - Add this section */}
         <View 
           style={[
             styles.card,
@@ -202,12 +229,27 @@ export default function TodayScreen() {
             }
           ]}
         >
-          <Text style={[{ color: theme.colors.text.primary }, theme.textStyles.h4]}>
+          <Text style={[{ color: theme.colors.text.primary, marginBottom: theme.spacing.md }, theme.textStyles.h4]}>
             📅 Today's Habits
           </Text>
-          <Text style={[{ color: theme.colors.text.secondary, marginTop: theme.spacing.md }, theme.textStyles.body]}>
-            Your habit list and completion tracking will appear here next.
-          </Text>
+          
+          {todayHabits.length === 0 ? (
+            <Text style={[{ color: theme.colors.text.secondary }, theme.textStyles.body]}>
+              No habits scheduled for today. You can add habits from the Habits tab!
+            </Text>
+          ) : (
+            <View>
+              {todayHabits.map((habit) => (
+                <HabitCard
+                  key={habit.id}
+                  habit={habit}
+                  isCompleted={isHabitCompletedToday(habit)}
+                  onToggleComplete={() => handleToggleComplete(habit.id)}
+                  onStar={() => handleToggleStar(habit.id)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
