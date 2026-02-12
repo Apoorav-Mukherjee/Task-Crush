@@ -5,7 +5,8 @@ import { Platform } from 'react-native';
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -45,19 +46,25 @@ export const NotificationService = {
   },
 
   // Schedule a daily reminder
-  async scheduleDailyReminder(hour: number, minute: number, habitName?: string): Promise<string | null> {
+  async scheduleDailyReminder(
+    hour: number,
+    minute: number,
+    habitName?: string
+  ): Promise<string | null> {
     try {
       const id = await Notifications.scheduleNotificationAsync({
         content: {
           title: '🎯 Time for your habits!',
-          body: habitName ? `Don't forget: ${habitName}` : 'Complete your daily habits and build better routines!',
+          body: habitName
+            ? `Don't forget: ${habitName}`
+            : 'Complete your daily habits and build better routines!',
           sound: true,
           priority: Notifications.AndroidNotificationPriority.HIGH,
         },
         trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DAILY,
           hour,
           minute,
-          repeats: true,
         },
       });
 
