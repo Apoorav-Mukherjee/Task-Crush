@@ -1,37 +1,47 @@
-import * as WebBrowser from 'expo-web-browser';
-import * as Google from 'expo-auth-session/providers/google';
-import { StorageService, StorageKeys } from './storage';
 import * as AuthSession from 'expo-auth-session';
-
+import * as WebBrowser from 'expo-web-browser';
+import { StorageService, StorageKeys } from './storage';
+import { Platform } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// You'll need to get these from Google Cloud Console
-const GOOGLE_CLIENT_ID = '1033217324722-hsovoni4d5p244q36ja1cg1st7qcs4ko.apps.googleusercontent.com';
-const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+// Replace with your actual Google Client ID
+const GOOGLE_CLIENT_ID = '1033217324722-0ivvqgj8jiicmv3r9sd7cjqsctsslve3.apps.googleusercontent.com';
 
-const redirectUri = AuthSession.makeRedirectUri({
-  scheme: 'habittracker', // MUST match app.json
-});
+const discovery = {
+  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenEndpoint: 'https://oauth2.googleapis.com/token',
+  revocationEndpoint: 'https://oauth2.googleapis.com/revoke',
+};
 
-
+export interface BackupFile {
+  id: string;
+  name: string;
+  createdTime: string;
+  size: string;
+}
 
 export const GoogleDriveService = {
-  // Initialize Google Sign-In
-  useGoogleAuth() {
-    const [request, response, promptAsync] = Google.useAuthRequest({
-      clientId: '1033217324722-hsovoni4d5p244q36ja1cg1st7qcs4ko.apps.googleusercontent.com',
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-      redirectUri,
+  // Create auth request
+  createAuthRequest() {
+    const redirectUri = AuthSession.makeRedirectUri({
+      
     });
-    
-    console.log(redirectUri);
 
-    return { request, response, promptAsync };
+    console.log('Redirect URI:', redirectUri); // For debugging
+
+    return AuthSession.useAuthRequest(
+      {
+        clientId: GOOGLE_CLIENT_ID,
+        scopes: ['https://www.googleapis.com/auth/drive.file'],
+        redirectUri,
+      },
+      discovery
+    );
   },
 
   // Upload backup to Google Drive
-  async uploadBackup(accessToken: string): Promise<boolean> {
+  async uploadBackup(accessToken: string): Promise<{ success: boolean; error?: string }> {
     try {
       // Get all data
       const habits = await StorageService.getObject(StorageKeys.HABITS);
@@ -42,44 +52,78 @@ export const GoogleDriveService = {
         profile,
         timestamp: new Date().toISOString(),
         version: '1.0.0',
+        appName: 'Habit Tracker',
       };
 
-      const blob = new Blob([JSON.stringify(backupData)], { type: 'application/json' });
+      const fileName = `habit-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+      const fileContent = JSON.stringify(backupData, null, 2);
+
+      // Step 1: Create file metadata
       const metadata = {
-        name: `habit-tracker-backup-${Date.now()}.json`,
+        name: fileName,
         mimeType: 'application/json',
+        parents: ['appDataFolder'], // Store in app-specific folder
       };
 
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', blob);
+      // Step 2: Upload file
+      const boundary = '-------314159265358979323846';
+      const delimiter = `\r\n--${boundary}\r\n`;
+      const closeDelimiter = `\r\n--${boundary}--`;
 
-      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: form,
-      });
+      const multipartRequestBody =
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        fileContent +
+        closeDelimiter;
 
-      return response.ok;
+      const response = await fetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`,
+          },
+          body: multipartRequestBody,
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Upload error:', error);
+        return { success: false, error: 'Failed to upload backup' };
+      }
+
+      return { success: true };
     } catch (error) {
       console.error('Backup upload error:', error);
-      return false;
+      return { success: false, error: String(error) };
     }
   },
 
   // List backups from Google Drive
-  async listBackups(accessToken: string): Promise<any[]> {
+  async listBackups(accessToken: string): Promise<BackupFile[]> {
     try {
       const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=name contains 'habit-tracker-backup'&orderBy=createdTime desc`,
+        `https://www.googleapis.com/drive/v3/files?` +
+        `q=name contains 'habit-tracker-backup' and trashed=false&` +
+        `orderBy=createdTime desc&` +
+        `fields=files(id,name,createdTime,size)&` +
+        `spaces=appDataFolder`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
         }
       );
+
+      if (!response.ok) {
+        console.error('List error:', await response.text());
+        return [];
+      }
 
       const data = await response.json();
       return data.files || [];
@@ -90,7 +134,7 @@ export const GoogleDriveService = {
   },
 
   // Download and restore backup
-  async restoreBackup(accessToken: string, fileId: string): Promise<boolean> {
+  async restoreBackup(accessToken: string, fileId: string): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
@@ -101,8 +145,18 @@ export const GoogleDriveService = {
         }
       );
 
+      if (!response.ok) {
+        return { success: false, error: 'Failed to download backup' };
+      }
+
       const backupData = await response.json();
 
+      // Validate backup data
+      if (!backupData.version || backupData.appName !== 'Habit Tracker') {
+        return { success: false, error: 'Invalid backup file' };
+      }
+
+      // Restore data
       if (backupData.habits) {
         await StorageService.setObject(StorageKeys.HABITS, backupData.habits);
       }
@@ -110,9 +164,29 @@ export const GoogleDriveService = {
         await StorageService.setObject(StorageKeys.USER_PROFILE, backupData.profile);
       }
 
-      return true;
+      return { success: true };
     } catch (error) {
       console.error('Restore backup error:', error);
+      return { success: false, error: String(error) };
+    }
+  },
+
+  // Delete a backup
+  async deleteBackup(accessToken: string, fileId: string): Promise<boolean> {
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      return response.ok;
+    } catch (error) {
+      console.error('Delete backup error:', error);
       return false;
     }
   },

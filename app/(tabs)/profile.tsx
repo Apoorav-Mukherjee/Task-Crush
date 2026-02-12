@@ -21,7 +21,7 @@ export default function ProfileScreen() {
   const { habits, loadHabits } = useHabitStore();
 
   const [googleToken, setGoogleToken] = useState<string | null>(null);
-  const { request, response, promptAsync } = GoogleDriveService.useGoogleAuth();
+ 
 
   const [showDevSection, setShowDevSection] = useState(false);
   const [tapCount, setTapCount] = useState(0);
@@ -47,28 +47,7 @@ export default function ProfileScreen() {
       setNotificationsEnabled(false);
     }
   };
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      setGoogleToken(authentication?.accessToken || null);
-    }
-  }, [response]);
-
-  const handleGoogleBackup = async () => {
-    if (!googleToken) {
-      // Sign in first
-      await promptAsync();
-      
-      return;
-    }
-
-    const success = await GoogleDriveService.uploadBackup(googleToken);
-    if (success) {
-      Alert.alert('Success', 'Backup uploaded to Google Drive!');
-    } else {
-      Alert.alert('Error', 'Failed to upload backup');
-    }
-  };
+  
 
   const handleEditProfile = () => {
     router.push('/modals/edit-profile');
@@ -268,11 +247,12 @@ export default function ProfileScreen() {
             onPress={() => Alert.alert('Coming Soon', 'Export functionality will be added soon!')}
           />
 
+
           <SettingItem
             icon="cloud-upload-outline"
-            label={googleToken ? "Backup to Google Drive" : "Sign in to Google Drive"}
+            label="Google Drive Backup"
             type="navigation"
-            onPress={handleGoogleBackup}
+            onPress={() => router.push('/modals/backup-manager')}
           />
 
           <SettingItem
@@ -290,7 +270,7 @@ export default function ProfileScreen() {
             ℹ️ About
           </Text>
 
-          // Replace the Version SettingItem with this:
+
           <TouchableOpacity onPress={handleVersionTap}>
             <SettingItem
               icon="information-circle-outline"
