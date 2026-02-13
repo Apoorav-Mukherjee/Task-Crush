@@ -64,7 +64,7 @@ A beautiful, gamified habit tracking app built with React Native and Expo, follo
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/yourusername/habit-tracker.git
+   git clone https://github.com/yourusername/Task-Crush.git
    cd habit-tracker
 ```
 
