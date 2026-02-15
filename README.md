@@ -49,17 +49,17 @@ A beautiful, gamified habit tracking app built with React Native and Expo, follo
 
 ## 📱 Screenshots
 
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 32 45" src="https://github.com/user-attachments/assets/0631f259-9c43-4f0c-aeef-4ef5591f67bc" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 32 36" src="https://github.com/user-attachments/assets/418c6de9-9ea0-446d-8e30-28cf43c4fef6" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 28 09" src="https://github.com/user-attachments/assets/ea7636c0-73b5-4308-9956-bee3ba8a4327" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 26 48" src="https://github.com/user-attachments/assets/5bc3b3b0-24a6-4d0d-8a1b-4c7aae9f000a" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 26 45" src="https://github.com/user-attachments/assets/e27964a8-c299-4fa1-9850-5c178e4aaf66" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 26 27" src="https://github.com/user-attachments/assets/a7a01207-701f-47f1-be0e-ada02e51620d" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 25 22" src="https://github.com/user-attachments/assets/ba9ae38c-0bb1-4919-bd02-4ae81999ff46" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 34 26" src="https://github.com/user-attachments/assets/d6d23e8a-6c9f-4118-82ff-b9bc41167def" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 34 12" src="https://github.com/user-attachments/assets/708e0dfe-7d45-4fc2-ad59-4a53564fc7d4" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 33 52" src="https://github.com/user-attachments/assets/f878db5a-3f25-48fe-af27-788fad2da5da" />
-<img width="750" height="1000" alt="Screen Shot 2026-02-14 at 08 33 08" src="https://github.com/user-attachments/assets/da49f254-b720-45bb-9ead-e583c72c8289" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 27" src="https://github.com/user-attachments/assets/e096e1ee-b707-474c-a896-ac41c7c4b385" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 25 22" src="https://github.com/user-attachments/assets/95ef6a00-f928-41bd-a05d-691b0d9ef30e" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 28 09" src="https://github.com/user-attachments/assets/93ca3875-9c43-45eb-8f1c-eaebbff5e383" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 48" src="https://github.com/user-attachments/assets/2c4d36d3-1513-44ba-a91c-715a25d3cab7" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 45" src="https://github.com/user-attachments/assets/bfe116b7-4be5-4612-aea9-53097bbb2761" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 33 08" src="https://github.com/user-attachments/assets/db6abeff-9a14-43b4-b46f-3db294509d73" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 28 09" src="https://github.com/user-attachments/assets/92cc8e3d-9a77-4236-a19f-3bf9550b8621" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 32 45" src="https://github.com/user-attachments/assets/6e5a793f-b284-467a-b8a4-098bf95e523b" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 32 36" src="https://github.com/user-attachments/assets/cc74a6ed-12b4-483e-9731-22852779a799" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 33 52" src="https://github.com/user-attachments/assets/88fe88e5-2dfd-49a3-9021-9170a7f01629" />
+
 
 
 ## 🚀 Getting Started
