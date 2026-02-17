@@ -49,7 +49,20 @@ A beautiful, gamified habit tracking app built with React Native and Expo, follo
 
 ## 📱 Screenshots
 
-> _Add your app screenshots here_
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 27" src="https://github.com/user-attachments/assets/e096e1ee-b707-474c-a896-ac41c7c4b385" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 25 22" src="https://github.com/user-attachments/assets/95ef6a00-f928-41bd-a05d-691b0d9ef30e" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 28 09" src="https://github.com/user-attachments/assets/93ca3875-9c43-45eb-8f1c-eaebbff5e383" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 48" src="https://github.com/user-attachments/assets/2c4d36d3-1513-44ba-a91c-715a25d3cab7" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 26 45" src="https://github.com/user-attachments/assets/bfe116b7-4be5-4612-aea9-53097bbb2761" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 33 08" src="https://github.com/user-attachments/assets/db6abeff-9a14-43b4-b46f-3db294509d73" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 28 09" src="https://github.com/user-attachments/assets/92cc8e3d-9a77-4236-a19f-3bf9550b8621" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 32 45" src="https://github.com/user-attachments/assets/6e5a793f-b284-467a-b8a4-098bf95e523b" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 32 36" src="https://github.com/user-attachments/assets/cc74a6ed-12b4-483e-9731-22852779a799" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 33 52" src="https://github.com/user-attachments/assets/88fe88e5-2dfd-49a3-9021-9170a7f01629" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 34 12" src="https://github.com/user-attachments/assets/90a25daf-e87b-4b2b-a9df-a858699e439e" />
+<img width="360" height="800" alt="Screen Shot 2026-02-14 at 08 34 26" src="https://github.com/user-attachments/assets/dc9c5903-050f-487b-be52-023a40409cf7" />
+
+
 
 ## 🚀 Getting Started
 
