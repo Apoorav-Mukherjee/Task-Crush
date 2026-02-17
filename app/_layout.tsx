@@ -1,11 +1,11 @@
+import { Colors } from '@constants/Colors';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { useHabitStore, useUserStore } from '@store';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Colors } from '@constants/Colors';
-import { useHabitStore, useUserStore } from '@store';
+import { useEffect, useState } from 'react';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -75,7 +75,7 @@ export default function RootLayout() {
           },
         }}
       />
-      
+
     </ThemeProvider>
   );
 }

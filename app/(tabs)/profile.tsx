@@ -11,8 +11,8 @@ import { useState } from 'react';
 import * as Haptics from 'expo-haptics';
 import { StorageService, StorageKeys } from '@services/storage';
 import { NotificationService } from '@services/notifications';
-import { GoogleDriveService } from '@services/google-drive';
 import { useEffect } from 'react';
+import { BackupService } from '@services/backup';
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -20,8 +20,8 @@ export default function ProfileScreen() {
   const { profile, loadProfile } = useUserStore();
   const { habits, loadHabits } = useHabitStore();
 
-  const [googleToken, setGoogleToken] = useState<string | null>(null);
- 
+  const [backupLoading, setBackupLoading] = useState(false);
+
 
   const [showDevSection, setShowDevSection] = useState(false);
   const [tapCount, setTapCount] = useState(0);
@@ -47,7 +47,20 @@ export default function ProfileScreen() {
       setNotificationsEnabled(false);
     }
   };
-  
+
+  const handleExportBackup = async () => {
+    setBackupLoading(true);
+    const result = await BackupService.exportBackup();
+    setBackupLoading(false);
+
+    if (!result.success) {
+      Alert.alert('Export Failed', result.error || 'Could not export backup');
+    }
+  };
+
+  const handleImportBackup = () => {
+    router.push('/modals/backup-manager');
+  };
 
   const handleEditProfile = () => {
     router.push('/modals/edit-profile');
@@ -236,21 +249,26 @@ export default function ProfileScreen() {
 
         {/* Data Section */}
         <View style={styles.dataSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }, theme.textStyles.h4]}>
-            💾 Data
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: theme.colors.text.primary },
+              theme.textStyles.h4,
+            ]}
+          >
+            💾 Backup & Restore
           </Text>
 
           <SettingItem
-            icon="download-outline"
-            label="Export Data"
+            icon="cloud-upload-outline"
+            label="Export Backup"
             type="navigation"
-            onPress={() => Alert.alert('Coming Soon', 'Export functionality will be added soon!')}
+            onPress={handleExportBackup}
           />
 
-
           <SettingItem
-            icon="cloud-upload-outline"
-            label="Google Drive Backup"
+            icon="cloud-download-outline"
+            label="Restore from Backup"
             type="navigation"
             onPress={() => router.push('/modals/backup-manager')}
           />
