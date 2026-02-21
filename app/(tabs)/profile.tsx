@@ -12,7 +12,8 @@ import * as Haptics from 'expo-haptics';
 import { StorageService, StorageKeys } from '@services/storage';
 import { NotificationService } from '@services/notifications';
 import { useEffect } from 'react';
-import { BackupService } from '@services/backup';
+// import { BackupService } from '@services/backup';
+
 
 export default function ProfileScreen() {
   const theme = useTheme();
@@ -48,15 +49,15 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleExportBackup = async () => {
-    setBackupLoading(true);
-    const result = await BackupService.exportBackup();
-    setBackupLoading(false);
+  // const handleExportBackup = async () => {
+  //   setBackupLoading(true);
+  //   const result = await BackupService.exportBackup();
+  //   setBackupLoading(false);
 
-    if (!result.success) {
-      Alert.alert('Export Failed', result.error || 'Could not export backup');
-    }
-  };
+  //   if (!result.success) {
+  //     Alert.alert('Export Failed', result.error || 'Could not export backup');
+  //   }
+  // };
 
   const handleImportBackup = () => {
     router.push('/modals/backup-manager');
@@ -263,7 +264,7 @@ export default function ProfileScreen() {
             icon="cloud-upload-outline"
             label="Export Backup"
             type="navigation"
-            onPress={handleExportBackup}
+            onPress={() => Alert.alert('Export Backup', 'This feature is coming soon!')}
           />
 
           <SettingItem
