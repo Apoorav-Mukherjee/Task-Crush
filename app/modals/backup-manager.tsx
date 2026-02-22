@@ -16,6 +16,7 @@ import { useHabitStore, useUserStore } from '@store';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { jsx } from 'react/jsx-runtime';
 
 export default function BackupManagerModal() {
   const theme = useTheme();
